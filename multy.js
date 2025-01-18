@@ -98,8 +98,7 @@ class WebSocketClient {
 async function main() {
     try {
         const tokens = await readFile('tokens.txt');
-        rl.question('Do you want to use a proxy? (y/n): ', async (useProxyAnswer) => {
-            let useProxy = useProxyAnswer.toLowerCase() === 'y';
+        let useProxy = false; // Otomatik olarak 'n' cevabını simüle ediyor
             let proxies = [];
 
             if (useProxy) {
