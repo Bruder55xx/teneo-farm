@@ -99,37 +99,36 @@ async function main() {
     try {
         const tokens = await readFile('tokens.txt');
         let useProxy = false; // Otomatik olarak 'n' cevabını simüle ediyor
-            let proxies = [];
+        let proxies = [];
 
-            if (useProxy) {
-                proxies = await readFile('proxies.txt');
+        if (useProxy) {
+            proxies = await readFile('proxies.txt');
+        }
+
+        if (tokens.length > 0) {
+            const wsClients = [];
+
+            for (let i = 0; i < tokens.length; i++) {
+                const token = tokens[i];
+                const proxy = proxies[i % proxies.length] || null;
+                console.log(`Connecting WebSocket for account: ${i + 1} - Proxy: ${proxy || 'None'}`);
+
+                const wsClient = new WebSocketClient(token, proxy);
+                wsClient.connect();
+                wsClients.push(wsClient);
+                await new Promise(resolve => setTimeout(resolve, 1000));
             }
 
-            if (tokens.length > 0) {
-                const wsClients = [];
-
-                for (let i = 0; i < tokens.length; i++) {
-                    const token = tokens[i];
-                    const proxy = proxies[i % proxies.length] || null;
-                    console.log(`Connecting WebSocket for account: ${i + 1} - Proxy: ${proxy || 'None'}`);
-
-                    const wsClient = new WebSocketClient(token, proxy);
-                    wsClient.connect();
-                    wsClients.push(wsClient);
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                }
-
-                process.on('SIGINT', () => {
-                    console.log('Program exited. Stopping pinging and disconnecting All WebSockets...');
-                    wsClients.forEach(client => client.stopPinging());
-                    wsClients.forEach(client => client.disconnect());
-                    process.exit(0);
-                });
-            } else {
-                console.log('No tokens found in tokens.txt - exiting...');
+            process.on('SIGINT', () => {
+                console.log('Program exited. Stopping pinging and disconnecting All WebSockets...');
+                wsClients.forEach(client => client.stopPinging());
+                wsClients.forEach(client => client.disconnect());
                 process.exit(0);
-            }
-        });
+            });
+        } else {
+            console.log('No tokens found in tokens.txt - exiting...');
+            process.exit(0);
+        }
     } catch (error) {
         console.error('Error in main function:', error);
     }
