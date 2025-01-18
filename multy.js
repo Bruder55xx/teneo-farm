@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const fs = require('fs/promises');
 const HttpsProxyAgent = require('https-proxy-agent');
 const readline = require('readline');
-
+const keep_alive = require('./keep_alive.js')
 async function readFile(filePath) {
     try {
         const data = await fs.readFile(filePath, 'utf-8');
